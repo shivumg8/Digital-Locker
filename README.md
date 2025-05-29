@@ -35,8 +35,8 @@ digital-locker/
 │ ├── index.html
 │ ├── style.css
 │ └── locker.js
-│
-└── README.md
+
+
 ---
 
 ## 🚀 Getting Started
