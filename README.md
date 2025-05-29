@@ -50,7 +50,7 @@ digital-locker/
 
 1. Clone the repository:
 
-git clone https://github.com/your-username/digital-locker.git
+git clone https://github.com/shivumg8/Digital-Locker.git
 cd digital-locker
 Build and run the Spring Boot app:
 
