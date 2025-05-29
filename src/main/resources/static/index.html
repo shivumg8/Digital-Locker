@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Digital Locker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e8f0f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 40px;
+    }
+
+    .wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .panel {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      flex: 1;
+    }
+
+    h3 {
+      color: #2980b9;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #2980b9;
+      padding-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: 0.3s;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #2980b9;
+      background-color: #eaf4fc;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #1c5980;
+    }
+
+    /* Modal popup for Get Document and Result */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Digital Locker</h1>
+
+  <div class="wrapper">
+    <!-- Left Panel -->
+    <div class="panel">
+      <h3>Create Locker</h3>
+      <input type="password" id="pin" placeholder="Set PIN" />
+      <button onclick="createLocker()">Create Locker</button>
+
+      <h3>Change PIN</h3>
+      <input type="password" id="oldPin" placeholder="Old PIN" />
+      <input type="password" id="newPin" placeholder="New PIN" />
+      <button onclick="changePin()">Change PIN</button>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="panel">
+      <h3>Store Document</h3>
+      <input type="text" id="docName" placeholder="Document Name" />
+      <textarea id="docContent" placeholder="Content..."></textarea>
+      <input type="password" id="docPin" placeholder="Enter PIN" />
+      <button onclick="storeDocument()">Store Document</button>
+
+      <h3>Retrieve Document</h3>
+      <button onclick="openGetDocModal()">Get Document</button>
+    </div>
+  </div>
+
+  <!-- Get Document Modal -->
+  <div class="modal" id="getDocModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal('getDocModal')">&times;</span>
+      <h3>Retrieve Document</h3>
+      <input type="text" id="retrieveDocName" placeholder="Document Name" />
+      <input type="password" id="retrievePin" placeholder="Enter PIN" />
+      <button onclick="getDocument()">Fetch Document</button>
+    </div>
+  </div>
+
+  <!-- Result Popup Modal -->
+  <div class="modal" id="resultModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal('resultModal')">&times;</span>
+      <div id="resultMessage" style="font-size: 1.1rem;"></div>
+    </div>
+  </div>
+
+  <script>
+    function openGetDocModal() {
+      document.getElementById("getDocModal").style.display = "block";
+    }
+
+    function showResultPopup(message) {
+      document.getElementById("resultMessage").innerText = message;
+      document.getElementById("resultModal").style.display = "block";
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    async function createLocker() {
+      const pin = document.getElementById("pin").value;
+      const res = await fetch("/locker/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin }),
+      });
+      const result = await res.text();
+      showResultPopup(result);
+    }
+
+    async function changePin() {
+      const oldPin = document.getElementById("oldPin").value;
+      const newPin = document.getElementById("newPin").value;
+      const res = await fetch("/locker/change-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ oldPin, newPin }),
+      });
+      const result = await res.text();
+      showResultPopup(result);
+    }
+
+    async function storeDocument() {
+      const pin = document.getElementById("docPin").value;
+      const docName = document.getElementById("docName").value;
+      const docContent = document.getElementById("docContent").value;
+      const res = await fetch("/locker/store", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, docName, docContent }),
+      });
+      const result = await res.text();
+      showResultPopup(result);
+    }
+
+    async function getDocument() {
+      const pin = document.getElementById("retrievePin").value;
+      const docName = document.getElementById("retrieveDocName").value;
+      const res = await fetch(`/locker/document?pin=${encodeURIComponent(pin)}&docName=${encodeURIComponent(docName)}`);
+      const result = await res.text();
+      closeModal("getDocModal");
+      showResultPopup(result);
+    }
+
+    // Close modals if user clicks outside the modal content
+    window.onclick = function(event) {
+      const getDocModal = document.getElementById("getDocModal");
+      const resultModal = document.getElementById("resultModal");
+      if (event.target === getDocModal) closeModal("getDocModal");
+      if (event.target === resultModal) closeModal("resultModal");
+    };
+  </script>
+</body>
+</html>
